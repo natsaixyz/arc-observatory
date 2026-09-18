@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.DS_Store
+.env
+
+observatory.db
+observatory.db-shm
+observatory.db-wal
+*.sqlite
+*.sqlite3

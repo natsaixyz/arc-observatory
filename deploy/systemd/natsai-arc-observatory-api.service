@@ -1,0 +1,34 @@
+[Unit]
+Description=Natsai Arc Observatory Read-Only API
+After=network-online.target natsai-arc-observatory.service
+Wants=network-online.target natsai-arc-observatory.service
+
+[Service]
+Type=simple
+User=natsai-observatory
+Group=natsai-observatory
+
+ExecStart=/usr/bin/python3 /opt/natsai-arc-observatory/api.py
+
+Restart=always
+RestartSec=3
+
+Environment=PYTHONUNBUFFERED=1
+Environment=PYTHONDONTWRITEBYTECODE=1
+
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LockPersonality=true
+
+MemoryMax=128M
+CPUQuota=10%
+
+[Install]
+WantedBy=multi-user.target

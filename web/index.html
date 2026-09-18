@@ -1,0 +1,471 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Arc Observatory — Natsai</title>
+<meta name="description" content="Operator-side Arc Mainnet consensus and finality telemetry by Natsai.">
+<style>
+:root {
+  color-scheme: dark;
+  --bg:#080a0d;
+  --panel:#101419;
+  --panel2:#151a21;
+  --border:#252c35;
+  --text:#edf2f7;
+  --muted:#8e9aa9;
+  --good:#4ade80;
+  --warn:#facc15;
+  --bad:#fb7185;
+  --accent:#8ba5ff;
+}
+* { box-sizing:border-box; }
+body {
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+.wrap {
+  max-width:1180px;
+  margin:0 auto;
+  padding:36px 22px 70px;
+}
+header {
+  display:flex;
+  justify-content:space-between;
+  gap:20px;
+  align-items:flex-start;
+  margin-bottom:32px;
+}
+h1 {
+  margin:0 0 7px;
+  font-size:32px;
+  letter-spacing:-.04em;
+}
+.subtitle {
+  color:var(--muted);
+  max-width:680px;
+  line-height:1.5;
+}
+.brand {
+  color:var(--muted);
+  font-size:14px;
+}
+.brand a, a {
+  color:var(--accent);
+  text-decoration:none;
+}
+.badge {
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:7px 11px;
+  border:1px solid var(--border);
+  border-radius:999px;
+  font-size:13px;
+}
+.dot {
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:var(--muted);
+}
+.dot.good { background:var(--good); }
+.grid {
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:12px;
+  margin-bottom:18px;
+}
+.card {
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:18px;
+}
+.label {
+  color:var(--muted);
+  font-size:12px;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  margin-bottom:8px;
+}
+.value {
+  font-size:25px;
+  font-weight:650;
+  letter-spacing:-.03em;
+}
+.small {
+  color:var(--muted);
+  font-size:13px;
+  margin-top:5px;
+}
+.section {
+  margin-top:18px;
+}
+.section h2 {
+  font-size:18px;
+  margin:0 0 12px;
+}
+.two {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+.row {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:15px;
+  border-bottom:1px solid var(--border);
+  padding:11px 0;
+}
+.row:last-child { border-bottom:0; }
+.key { color:var(--muted); }
+.good { color:var(--good); }
+.warn { color:var(--warn); }
+.bad { color:var(--bad); }
+.mono {
+  font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
+  font-size:13px;
+}
+table {
+  width:100%;
+  border-collapse:collapse;
+}
+th,td {
+  text-align:left;
+  padding:11px 10px;
+  border-bottom:1px solid var(--border);
+  font-size:13px;
+}
+th {
+  color:var(--muted);
+  font-weight:500;
+}
+td.num, th.num { text-align:right; }
+.notice {
+  color:var(--muted);
+  font-size:12px;
+  line-height:1.5;
+  margin-top:10px;
+}
+footer {
+  margin-top:30px;
+  color:var(--muted);
+  font-size:12px;
+  display:flex;
+  justify-content:space-between;
+  gap:20px;
+}
+@media(max-width:850px) {
+  .grid { grid-template-columns:1fr 1fr; }
+  .two { grid-template-columns:1fr; }
+}
+@media(max-width:540px) {
+  header { display:block; }
+  .brand { margin-top:16px; }
+  .grid { grid-template-columns:1fr; }
+  .hide-mobile { display:none; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div>
+    <h1>Arc Observatory</h1>
+    <div class="subtitle">
+      Operator-side consensus and finality telemetry for Arc Mainnet,
+      observed from Natsai-operated infrastructure.
+    </div>
+  </div>
+  <div class="brand">
+    by <a href="https://natsai.xyz">Natsai</a>
+  </div>
+</header>
+
+<div style="margin-bottom:18px">
+  <span class="badge">
+    <span id="status-dot" class="dot"></span>
+    <span id="network-status">Loading…</span>
+  </span>
+</div>
+
+<div class="grid">
+  <div class="card">
+    <div class="label">Network height</div>
+    <div class="value" id="height">—</div>
+    <div class="small">Arc Mainnet · Chain ID 5042</div>
+  </div>
+
+  <div class="card">
+    <div class="label">Latest certificate</div>
+    <div class="value" id="cert-height">—</div>
+    <div class="small" id="cert-round">Round —</div>
+  </div>
+
+  <div class="card">
+    <div class="label">Signed voting power</div>
+    <div class="value" id="signed-power">—</div>
+    <div class="small" id="quorum-margin">—</div>
+  </div>
+
+  <div class="card">
+    <div class="label">Validator set</div>
+    <div class="value" id="validator-count">—</div>
+    <div class="small" id="total-power">—</div>
+  </div>
+</div>
+
+<div class="two section">
+  <div class="card">
+    <h2>Finality</h2>
+
+    <div class="row">
+      <span class="key">Certificates observed</span>
+      <span id="cert-count">—</span>
+    </div>
+
+    <div class="row">
+      <span class="key">Average signed voting power</span>
+      <span id="avg-power">—</span>
+    </div>
+
+    <div class="row">
+      <span class="key">Certificates above round 0</span>
+      <span id="round-above">—</span>
+    </div>
+
+    <div class="row">
+      <span class="key">First observed height</span>
+      <span id="first-height">—</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Consistency</h2>
+
+    <div class="row">
+      <span class="key">Certificate ↔ execution</span>
+      <span id="cert-match">—</span>
+    </div>
+
+    <div class="row">
+      <span class="key">Natsai ↔ official Arc RPC</span>
+      <span id="rpc-match">—</span>
+    </div>
+
+    <div class="row">
+      <span class="key">Unknown certificate signers</span>
+      <span id="unknown-signers">—</span>
+    </div>
+
+    <div class="row">
+      <span class="key">Current sync state</span>
+      <span id="sync-state">—</span>
+    </div>
+  </div>
+</div>
+
+<div class="card section">
+  <h2>Latest finality certificate</h2>
+
+  <div class="row">
+    <span class="key">Block hash</span>
+    <span id="block-hash" class="mono">—</span>
+  </div>
+
+  <div class="row">
+    <span class="key">Signers included</span>
+    <span id="signer-count">—</span>
+  </div>
+
+  <div class="row">
+    <span class="key">Signed / total voting power</span>
+    <span id="power-raw">—</span>
+  </div>
+
+  <div class="row">
+    <span class="key">BFT quorum required</span>
+    <span id="quorum">—</span>
+  </div>
+</div>
+
+<div class="card section">
+  <h2>Validator certificate inclusion</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Validator</th>
+        <th class="num">Voting power</th>
+        <th class="num hide-mobile">Certificates</th>
+        <th class="num">Inclusion</th>
+      </tr>
+    </thead>
+    <tbody id="validators"></tbody>
+  </table>
+
+  <div class="notice">
+    Certificate inclusion reflects whether a validator signature appeared in
+    an observed finalized certificate. It is not a validator uptime or
+    performance score.
+  </div>
+</div>
+
+<footer>
+  <div>
+    Public RPC:
+    <a href="https://rpc.arc-mainnet.natsai.xyz">
+      rpc.arc-mainnet.natsai.xyz
+    </a>
+  </div>
+  <div id="updated">—</div>
+</footer>
+
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+
+const fmt = n =>
+  Number(n).toLocaleString("en-US");
+
+const pct = n =>
+  Number(n).toFixed(2) + "%";
+
+const short = s =>
+  s ? s.slice(0,8) + "…" + s.slice(-6) : "—";
+
+async function get(path) {
+  const r = await fetch(path, {cache:"no-store"});
+  if (!r.ok) throw new Error(path + " returned " + r.status);
+  return r.json();
+}
+
+async function refresh() {
+  try {
+    const [summary, latest, validators] = await Promise.all([
+      get("/api/summary"),
+      get("/api/latest"),
+      get("/api/validators")
+    ]);
+
+    const s = summary.status;
+    const set = summary.validator_set;
+    const obs = summary.observations;
+    const cert = latest.latest_certificate;
+
+    $("network-status").textContent =
+      "Arc Mainnet · " + s.sync_state;
+
+    $("status-dot").className =
+      "dot " + (s.sync_state === "InSync" ? "good" : "");
+
+    $("height").textContent = fmt(s.height);
+    $("cert-height").textContent = fmt(cert.height);
+    $("cert-round").textContent = "Round " + cert.round;
+
+    $("signed-power").textContent =
+      pct(cert.signed_voting_power_pct);
+
+    $("quorum-margin").textContent =
+      "+" + fmt(cert.voting_power_above_quorum) +
+      " VP above quorum";
+
+    $("validator-count").textContent =
+      fmt(set.validator_count);
+
+    $("total-power").textContent =
+      fmt(set.total_voting_power) + " total voting power";
+
+    $("cert-count").textContent =
+      fmt(obs.certificates);
+
+    $("avg-power").textContent =
+      pct(obs.avg_signed_voting_power_pct);
+
+    $("round-above").textContent =
+      fmt(obs.rounds_above_zero);
+
+    $("first-height").textContent =
+      fmt(obs.first_height);
+
+    $("cert-match").innerHTML =
+      obs.certificate_mismatches === 0
+      ? '<span class="good">Consistent</span>'
+      : '<span class="bad">' +
+        fmt(obs.certificate_mismatches) +
+        ' mismatch(es)</span>';
+
+    $("rpc-match").innerHTML =
+      obs.rpc_mismatches === 0
+      ? '<span class="good">Consistent</span>'
+      : '<span class="bad">' +
+        fmt(obs.rpc_mismatches) +
+        ' mismatch(es)</span>';
+
+    $("unknown-signers").innerHTML =
+      obs.unknown_signer_events === 0
+      ? '<span class="good">None</span>'
+      : '<span class="warn">' +
+        fmt(obs.unknown_signer_events) +
+        '</span>';
+
+    $("sync-state").textContent = s.sync_state;
+
+    $("block-hash").textContent =
+      short(cert.block_hash);
+
+    $("block-hash").title =
+      cert.block_hash;
+
+    $("signer-count").textContent =
+      fmt(cert.signer_count);
+
+    $("power-raw").textContent =
+      fmt(cert.signed_voting_power) +
+      " / " +
+      fmt(cert.total_voting_power);
+
+    $("quorum").textContent =
+      fmt(cert.quorum_required);
+
+    $("validators").innerHTML =
+      validators.validators.map(v => {
+        const inclusion =
+          v.certificate_inclusion_pct ??
+          v.certificate_participation_pct ??
+          0;
+
+        return `
+          <tr>
+            <td class="mono" title="${v.address}">
+              ${short(v.address)}
+            </td>
+            <td class="num">${fmt(v.voting_power)}</td>
+            <td class="num hide-mobile">
+              ${fmt(v.certificate_appearances)}
+            </td>
+            <td class="num">${pct(inclusion)}</td>
+          </tr>`;
+      }).join("");
+
+    $("updated").textContent =
+      "Updated " + new Date().toLocaleTimeString();
+
+  } catch (e) {
+    $("network-status").textContent = "Telemetry unavailable";
+    $("status-dot").className = "dot bad";
+    console.error(e);
+  }
+}
+
+refresh();
+setInterval(refresh, 5000);
+</script>
+</body>
+</html>
