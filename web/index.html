@@ -348,11 +348,12 @@ async function get(path) {
 
 async function refresh() {
   try {
-    const [summary, latest, validators] = await Promise.all([
+    const [summary, latest] = await Promise.all([
       get("/api/summary"),
-      get("/api/latest"),
-      get("/api/validators")
+      get("/api/latest")
     ]);
+
+    const validators = window.validatorsCache || {validators: []};
 
     const s = summary.status;
     const set = summary.validator_set;
@@ -466,6 +467,18 @@ async function refresh() {
 
 refresh();
 setInterval(refresh, 5000);
+
+async function refreshValidators() {
+  try {
+    window.validatorsCache = await get("/api/validators");
+    refresh();
+  } catch (err) {
+    console.error("Validator refresh failed:", err);
+  }
+}
+
+refreshValidators();
+setInterval(refreshValidators, 30000);
 </script>
 </body>
 </html>

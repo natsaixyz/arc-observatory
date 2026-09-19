@@ -204,33 +204,56 @@ class Handler(BaseHTTPRequestHandler):
 
                     set_hash = latest["validator_set_hash"]
 
+                    window_size = 10000
+
                     total = conn.execute("""
                         SELECT COUNT(*) AS n
-                        FROM certificates
-                        WHERE validator_set_hash = ?
-                    """, (set_hash,)).fetchone()["n"]
+                        FROM (
+                            SELECT height
+                            FROM certificates
+                            WHERE validator_set_hash = ?
+                            ORDER BY height DESC
+                            LIMIT ?
+                        )
+                    """, (set_hash, window_size)).fetchone()["n"]
 
                     rows = conn.execute("""
+                        WITH recent AS (
+                            SELECT height
+                            FROM certificates
+                            WHERE validator_set_hash = ?
+                            ORDER BY height DESC
+                            LIMIT ?
+                        ),
+                        signer_counts AS (
+                            SELECT
+                                cs.address,
+                                COUNT(*) AS certificate_appearances
+                            FROM certificate_signers cs
+                            JOIN recent r
+                                ON r.height = cs.height
+                            GROUP BY cs.address
+                        )
                         SELECT
                             v.address,
                             v.voting_power,
                             v.public_key_hex,
-                            COUNT(cs.height) AS certificate_appearances
+                            COALESCE(
+                                sc.certificate_appearances,
+                                0
+                            ) AS certificate_appearances
                         FROM validators v
-                        LEFT JOIN certificates c
-                            ON c.validator_set_hash = v.set_hash
-                        LEFT JOIN certificate_signers cs
-                            ON cs.height = c.height
-                            AND cs.address = v.address
+                        LEFT JOIN signer_counts sc
+                            ON sc.address = v.address
                         WHERE v.set_hash = ?
-                        GROUP BY
-                            v.address,
-                            v.voting_power,
-                            v.public_key_hex
                         ORDER BY
                             v.voting_power DESC,
                             v.address
-                    """, (set_hash,)).fetchall()
+                    """, (
+                        set_hash,
+                        window_size,
+                        set_hash,
+                    )).fetchall()
 
                 validators = []
 
@@ -249,7 +272,7 @@ class Handler(BaseHTTPRequestHandler):
                     "validator_set_hash": set_hash,
                     "certificates_observed": total,
                     "note":
-                        "Certificate inclusion reflects appearance in finalized certificates and is not a validator uptime metric.",
+                        "Certificate inclusion is calculated over the latest 10,000 observed finalized certificates and is not a validator uptime metric.",
                     "validators": validators,
                 })
 
