@@ -2,12 +2,27 @@
 
 import json
 import sqlite3
+import threading
+import time
+import urllib.request
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlparse
 
 DB = "/var/lib/natsai-arc-observatory/observatory.db"
 HOST = "127.0.0.1"
 PORT = 8790
+
+CL_API = "http://127.0.0.1:31000"
+FORENSIC_CACHE_TTL = 15
+
+FORENSIC_CACHE = {
+    "at": 0.0,
+    "start": None,
+    "count": None,
+    "value": None,
+}
+
+FORENSIC_LOCK = threading.Lock()
 
 
 def db():
@@ -22,6 +37,73 @@ def db():
 
 def row_dict(row):
     return dict(row) if row else None
+
+
+def cl_json(path, timeout=4):
+    req = urllib.request.Request(
+        CL_API + path,
+        headers={
+            "Accept": "application/vnd.arc.v1+json",
+            "User-Agent": "Natsai-Arc-Observatory/0.2",
+        },
+    )
+
+    with urllib.request.urlopen(req, timeout=timeout) as response:
+        return json.loads(response.read())
+
+
+def percentile(values, fraction):
+    if not values:
+        return None
+
+    values = sorted(float(v) for v in values)
+
+    index = round((len(values) - 1) * fraction)
+    return round(values[index], 1)
+
+
+def get_forensics(start, count):
+    current = time.monotonic()
+
+    with FORENSIC_LOCK:
+        if (
+            FORENSIC_CACHE["value"] is not None
+            and FORENSIC_CACHE["start"] == start
+            and FORENSIC_CACHE["count"] == count
+            and current - FORENSIC_CACHE["at"] < FORENSIC_CACHE_TTL
+        ):
+            return FORENSIC_CACHE["value"]
+
+    result = {}
+
+    endpoints = {
+        "proposal_monitor": "proposal-monitor",
+        "misbehavior": "misbehavior-evidence",
+        "invalid_payloads": "invalid-payloads",
+    }
+
+    for key, endpoint in endpoints.items():
+        try:
+            value = cl_json(
+                f"/{endpoint}?height={start}&count={count}"
+            )
+
+            result[key] = value if isinstance(value, list) else []
+            result[key + "_available"] = isinstance(value, list)
+
+        except Exception:
+            result[key] = []
+            result[key + "_available"] = False
+
+    with FORENSIC_LOCK:
+        FORENSIC_CACHE.update({
+            "at": current,
+            "start": start,
+            "count": count,
+            "value": result,
+        })
+
+    return result
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -188,6 +270,234 @@ class Handler(BaseHTTPRequestHandler):
                     "rounds": result,
                 })
 
+            if path == "/api/quorum":
+                with db() as conn:
+                    cert = conn.execute("""
+                        SELECT
+                            height,
+                            certificate_round AS round,
+                            block_hash,
+                            signer_count,
+                            total_voting_power,
+                            signed_voting_power,
+                            ROUND(
+                                signed_voting_power_pct,
+                                2
+                            ) AS signed_voting_power_pct,
+                            quorum_required,
+                            voting_power_above_quorum,
+                            validator_set_hash,
+                            proposer
+                        FROM certificates
+                        ORDER BY height DESC
+                        LIMIT 1
+                    """).fetchone()
+
+                    if not cert:
+                        return self.send_json({
+                            "certificate": None,
+                            "validators": [],
+                        })
+
+                    validators = conn.execute("""
+                        SELECT
+                            v.address,
+                            v.voting_power,
+                            CASE
+                                WHEN cs.address IS NULL THEN 0
+                                ELSE 1
+                            END AS signed
+                        FROM validators v
+                        LEFT JOIN certificate_signers cs
+                            ON cs.height = ?
+                            AND cs.address = v.address
+                        WHERE v.set_hash = ?
+                        ORDER BY
+                            v.voting_power DESC,
+                            v.address
+                    """, (
+                        cert["height"],
+                        cert["validator_set_hash"],
+                    )).fetchall()
+
+                return self.send_json({
+                    "certificate": row_dict(cert),
+                    "validators": [
+                        dict(row) for row in validators
+                    ],
+                    "note":
+                        "Signer inclusion reflects the latest observed finalized certificate.",
+                })
+
+            if path == "/api/pulse":
+                db_window = 10000
+                forensic_window = 100
+
+                with db() as conn:
+                    latest_height = conn.execute("""
+                        SELECT MAX(height)
+                        FROM certificates
+                    """).fetchone()[0]
+
+                    if latest_height is None:
+                        return self.send_json({
+                            "status": "no_data"
+                        })
+
+                    last_round_escalation = conn.execute("""
+                        SELECT MAX(height)
+                        FROM certificates
+                        WHERE certificate_round > 0
+                    """).fetchone()[0]
+
+                    if last_round_escalation is None:
+                        round_zero_streak = conn.execute("""
+                            SELECT COUNT(*)
+                            FROM certificates
+                        """).fetchone()[0]
+                    else:
+                        round_zero_streak = conn.execute("""
+                            SELECT COUNT(*)
+                            FROM certificates
+                            WHERE height > ?
+                        """, (
+                            last_round_escalation,
+                        )).fetchone()[0]
+
+                    anomalies = conn.execute("""
+                        WITH recent AS (
+                            SELECT
+                                height,
+                                certificate_round,
+                                cert_matches_execution,
+                                rpc_hash_match,
+                                unknown_signer_count
+                            FROM certificates
+                            ORDER BY height DESC
+                            LIMIT ?
+                        )
+                        SELECT *
+                        FROM recent
+                        WHERE
+                            certificate_round > 0
+                            OR cert_matches_execution = 0
+                            OR rpc_hash_match = 0
+                            OR unknown_signer_count > 0
+                        ORDER BY height DESC
+                        LIMIT 20
+                    """, (
+                        db_window,
+                    )).fetchall()
+
+                start = max(
+                    1,
+                    int(latest_height) - forensic_window + 1,
+                )
+
+                forensic = get_forensics(
+                    start,
+                    forensic_window,
+                )
+
+                proposal_points = []
+
+                for row in forensic["proposal_monitor"]:
+                    delay = row.get("proposal_delay_ms")
+
+                    if not isinstance(delay, (int, float)):
+                        continue
+
+                    proposal_points.append({
+                        "height": row.get("height"),
+                        "proposer": row.get("proposer"),
+                        "delay_ms": delay,
+                    })
+
+                proposal_points.sort(
+                    key=lambda x: x["height"] or 0
+                )
+
+                delays = [
+                    point["delay_ms"]
+                    for point in proposal_points
+                ]
+
+                misbehavior = []
+
+                for row in forensic["misbehavior"]:
+                    validators = row.get("validators") or []
+
+                    if validators:
+                        misbehavior.append({
+                            "height": row.get("height"),
+                            "validator_count": len(validators),
+                        })
+
+                invalid_payloads = []
+
+                for row in forensic["invalid_payloads"]:
+                    payloads = row.get("payloads") or []
+
+                    if payloads:
+                        invalid_payloads.append({
+                            "height": row.get("height"),
+                            "payload_count": len(payloads),
+                        })
+
+                db_anomalies = [
+                    dict(row) for row in anomalies
+                ]
+
+                event_count = (
+                    len(db_anomalies)
+                    + len(misbehavior)
+                    + len(invalid_payloads)
+                )
+
+                return self.send_json({
+                    "latest_height": latest_height,
+                    "round_zero_streak": round_zero_streak,
+
+                    "proposal_arrival": {
+                        "samples": len(delays),
+                        "latest_ms":
+                            proposal_points[-1]["delay_ms"]
+                            if proposal_points else None,
+                        "p50_ms": percentile(delays, 0.50),
+                        "p95_ms": percentile(delays, 0.95),
+                        "points": proposal_points[-60:],
+                        "available":
+                            forensic[
+                                "proposal_monitor_available"
+                            ],
+                    },
+
+                    "events": {
+                        "count": event_count,
+                        "database_anomalies": db_anomalies,
+                        "misbehavior": misbehavior,
+                        "invalid_payloads": invalid_payloads,
+                        "misbehavior_available":
+                            forensic[
+                                "misbehavior_available"
+                            ],
+                        "invalid_payloads_available":
+                            forensic[
+                                "invalid_payloads_available"
+                            ],
+                    },
+
+                    "windows": {
+                        "database_certificates":
+                            db_window,
+                        "forensic_heights":
+                            forensic_window,
+                    },
+
+                    "note":
+                        "Proposal arrival is observed from Natsai infrastructure and should not be interpreted as validator latency.",
+                })
+
             if path == "/api/validators":
                 with db() as conn:
                     latest = conn.execute("""
@@ -284,6 +594,8 @@ class Handler(BaseHTTPRequestHandler):
                         "/api/health",
                         "/api/summary",
                         "/api/latest",
+                        "/api/quorum",
+                        "/api/pulse",
                         "/api/validators",
                         "/api/rounds",
                     ],

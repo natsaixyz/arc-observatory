@@ -145,6 +145,391 @@ th {
   font-weight:500;
 }
 td.num, th.num { text-align:right; }
+
+.section-title {
+  display:flex;
+  justify-content:space-between;
+  align-items:baseline;
+  gap:16px;
+  margin-bottom:12px;
+}
+
+.section-title h2 {
+  margin:0;
+}
+
+.pulse-grid {
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:12px;
+}
+
+.pulse-card {
+  position:relative;
+  overflow:hidden;
+  background:
+    linear-gradient(145deg, rgba(139,165,255,.08), transparent 55%),
+    var(--panel);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:18px;
+}
+
+.pulse-card .value {
+  font-size:28px;
+}
+
+.pulse-card.good-card {
+  background:
+    linear-gradient(145deg, rgba(74,222,128,.09), transparent 55%),
+    var(--panel);
+}
+
+.consensus-live-grid {
+  display:grid;
+  grid-template-columns:1.25fr .75fr;
+  gap:12px;
+}
+
+.quorum-top {
+  display:flex;
+  justify-content:space-between;
+  gap:18px;
+  align-items:flex-end;
+  margin-bottom:16px;
+}
+
+.quorum-big {
+  font-size:30px;
+  font-weight:700;
+  letter-spacing:-.04em;
+}
+
+.quorum-track {
+  position:relative;
+  height:14px;
+  background:#1c222b;
+  border-radius:999px;
+  overflow:visible;
+  margin:18px 0 8px;
+}
+
+.quorum-fill {
+  position:absolute;
+  inset:0 auto 0 0;
+  width:0;
+  background:linear-gradient(90deg, #4ade80, #8ba5ff);
+  border-radius:999px;
+  transition:width .45s ease;
+}
+
+.quorum-threshold {
+  position:absolute;
+  top:-5px;
+  bottom:-5px;
+  width:2px;
+  background:var(--warn);
+  box-shadow:0 0 0 2px rgba(250,204,21,.12);
+}
+
+.quorum-labels {
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  color:var(--muted);
+  font-size:11px;
+}
+
+.validator-live-grid {
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:7px;
+  margin-top:18px;
+}
+
+.validator-live {
+  position:relative;
+  min-width:0;
+  padding:10px;
+  border-radius:9px;
+  border:1px solid var(--border);
+  background:var(--panel2);
+  opacity:.48;
+  transition:
+    opacity .25s ease,
+    border-color .25s ease,
+    transform .25s ease;
+}
+
+.validator-live.signed {
+  opacity:1;
+  border-color:rgba(74,222,128,.48);
+  box-shadow:inset 0 0 20px rgba(74,222,128,.035);
+}
+
+.validator-live.proposer {
+  outline:1px solid rgba(139,165,255,.6);
+}
+
+.validator-address {
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
+  font-size:11px;
+}
+
+.validator-meta {
+  display:flex;
+  justify-content:space-between;
+  gap:5px;
+  margin-top:7px;
+  color:var(--muted);
+  font-size:10px;
+}
+
+.validator-vp-track {
+  height:3px;
+  margin-top:8px;
+  background:#222934;
+  border-radius:99px;
+  overflow:hidden;
+}
+
+.validator-vp-fill {
+  height:100%;
+  background:var(--accent);
+  border-radius:99px;
+}
+
+.proposer-tag {
+  color:var(--accent);
+  font-weight:700;
+}
+
+.mini-grid {
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:8px;
+  margin:14px 0 10px;
+}
+
+.mini-stat {
+  background:var(--panel2);
+  border-radius:9px;
+  padding:10px;
+}
+
+.mini-stat .mini-value {
+  font-size:18px;
+  font-weight:650;
+}
+
+.mini-stat .mini-label {
+  color:var(--muted);
+  font-size:10px;
+  text-transform:uppercase;
+  letter-spacing:.06em;
+  margin-top:3px;
+}
+
+.spark-wrap {
+  height:170px;
+  margin-top:12px;
+  border:1px solid var(--border);
+  border-radius:10px;
+  background:#0c1014;
+  padding:8px;
+}
+
+.spark-wrap svg {
+  display:block;
+  width:100%;
+  height:100%;
+}
+
+.spark-line {
+  fill:none;
+  stroke:var(--accent);
+  stroke-width:2;
+  vector-effect:non-scaling-stroke;
+}
+
+.spark-fill {
+  fill:rgba(139,165,255,.08);
+}
+
+.spark-p50 {
+  stroke:rgba(74,222,128,.5);
+  stroke-width:1;
+  stroke-dasharray:4 4;
+  vector-effect:non-scaling-stroke;
+}
+
+.spark-p95 {
+  stroke:rgba(250,204,21,.5);
+  stroke-width:1;
+  stroke-dasharray:4 4;
+  vector-effect:non-scaling-stroke;
+}
+
+.event-clean {
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:15px;
+  background:rgba(74,222,128,.05);
+  border:1px solid rgba(74,222,128,.2);
+  border-radius:10px;
+}
+
+.event-clean-icon {
+  width:10px;
+  height:10px;
+  flex:0 0 10px;
+  border-radius:50%;
+  background:var(--good);
+  box-shadow:0 0 12px rgba(74,222,128,.55);
+}
+
+.event-item {
+  display:flex;
+  justify-content:space-between;
+  gap:20px;
+  border-bottom:1px solid var(--border);
+  padding:11px 0;
+}
+
+.event-item:last-child {
+  border-bottom:0;
+}
+
+.event-title {
+  font-size:13px;
+}
+
+.event-height {
+  color:var(--muted);
+  font-size:12px;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
+  white-space:nowrap;
+}
+
+@media(max-width:850px) {
+  .pulse-grid { grid-template-columns:1fr 1fr; }
+  .consensus-live-grid { grid-template-columns:1fr; }
+  .validator-live-grid { grid-template-columns:repeat(3,1fr); }
+}
+
+@media(max-width:540px) {
+  .pulse-grid { grid-template-columns:1fr 1fr; }
+  .validator-live-grid { grid-template-columns:repeat(2,1fr); }
+  .quorum-top { display:block; }
+  .quorum-big { margin-bottom:5px; }
+}
+
+
+/* Featured Live Quorum */
+#quorum-top-slot .card {
+  padding:15px 18px 13px;
+  background:
+    linear-gradient(135deg, rgba(139,165,255,.055), transparent 45%),
+    var(--panel);
+}
+
+#quorum-top-slot .section-title {
+  margin-bottom:7px;
+}
+
+#quorum-top-slot .quorum-top {
+  margin-bottom:4px;
+  align-items:center;
+}
+
+#quorum-top-slot .quorum-big {
+  font-size:27px;
+}
+
+#quorum-top-slot .quorum-track {
+  height:10px;
+  margin:9px 0 6px;
+}
+
+#quorum-top-slot .quorum-labels {
+  font-size:10px;
+}
+
+#quorum-top-slot .validator-live-grid {
+  grid-template-columns:repeat(17,minmax(0,1fr));
+  gap:5px;
+  margin-top:10px;
+}
+
+#quorum-top-slot .validator-live {
+  height:34px;
+  min-height:34px;
+  padding:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  position:relative;
+  opacity:.38;
+}
+
+#quorum-top-slot .validator-live.signed {
+  opacity:1;
+}
+
+#quorum-top-slot .validator-address,
+#quorum-top-slot .validator-meta,
+#quorum-top-slot .validator-vp-track {
+  display:none;
+}
+
+#quorum-top-slot .validator-live::after {
+  content:"";
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:#505967;
+}
+
+#quorum-top-slot .validator-live.signed::after {
+  background:var(--good);
+  box-shadow:0 0 10px rgba(74,222,128,.65);
+}
+
+#quorum-top-slot .validator-live.proposer::before {
+  content:"P";
+  position:absolute;
+  top:2px;
+  right:4px;
+  color:var(--accent);
+  font-size:8px;
+  font-weight:800;
+}
+
+#quorum-top-slot .notice {
+  margin-top:7px;
+  font-size:10px;
+}
+
+.consensus-live-grid.quorum-promoted {
+  grid-template-columns:1fr;
+}
+
+@media(max-width:850px) {
+  #quorum-top-slot .validator-live-grid {
+    grid-template-columns:repeat(9,1fr);
+  }
+}
+
+@media(max-width:540px) {
+  #quorum-top-slot .validator-live-grid {
+    grid-template-columns:repeat(5,1fr);
+  }
+}
+
 .notice {
   color:var(--muted);
   font-size:12px;
@@ -220,6 +605,8 @@ footer {
   </div>
 </div>
 
+<div id="quorum-top-slot" class="section"></div>
+
 <div class="two section">
   <div class="card">
     <h2>Finality</h2>
@@ -270,6 +657,130 @@ footer {
   </div>
 </div>
 
+
+<div class="section" id="consensus-pulse">
+  <div class="section-title">
+    <h2>Consensus Pulse</h2>
+    <span class="small" id="pulse-window">Live Arc consensus telemetry</span>
+  </div>
+
+  <div class="pulse-grid">
+    <div class="pulse-card good-card">
+      <div class="label">Round-0 observed streak</div>
+      <div class="value" id="round-zero-streak">—</div>
+      <div class="small">observed finalized certificates</div>
+    </div>
+
+    <div class="pulse-card">
+      <div class="label">Proposal arrival p50</div>
+      <div class="value" id="proposal-p50">—</div>
+      <div class="small">observed from Natsai infrastructure</div>
+    </div>
+
+    <div class="pulse-card">
+      <div class="label">Proposal arrival p95</div>
+      <div class="value" id="proposal-p95">—</div>
+      <div class="small">latest 100 observed heights</div>
+    </div>
+
+    <div class="pulse-card good-card">
+      <div class="label">Consensus events</div>
+      <div class="value" id="consensus-event-count">—</div>
+      <div class="small" id="event-window-label">current observation windows</div>
+    </div>
+  </div>
+</div>
+
+<div class="consensus-live-grid section">
+
+  <div class="card">
+    <div class="section-title">
+      <h2>Live Quorum</h2>
+      <span class="small" id="quorum-height">Height —</span>
+    </div>
+
+    <div class="quorum-top">
+      <div>
+        <div class="quorum-big" id="quorum-percent">—</div>
+        <div class="small" id="quorum-power">—</div>
+      </div>
+
+      <div style="text-align:right">
+        <div class="good" id="quorum-margin-live">—</div>
+        <div class="small">above BFT quorum</div>
+      </div>
+    </div>
+
+    <div class="quorum-track">
+      <div class="quorum-fill" id="quorum-fill"></div>
+      <div class="quorum-threshold" id="quorum-threshold"></div>
+    </div>
+
+    <div class="quorum-labels">
+      <span>0%</span>
+      <span id="quorum-threshold-label">BFT threshold —</span>
+      <span>100%</span>
+    </div>
+
+    <div class="validator-live-grid" id="quorum-validators"></div>
+
+    <div class="notice">
+      Bright tiles signed the latest observed finality certificate.
+      P marks the proposer. The quorum bar reflects signed voting power.
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-title">
+      <h2>Proposal Arrival</h2>
+      <span class="small">Natsai observation point</span>
+    </div>
+
+    <div class="mini-grid">
+      <div class="mini-stat">
+        <div class="mini-value" id="proposal-latest">—</div>
+        <div class="mini-label">Latest</div>
+      </div>
+
+      <div class="mini-stat">
+        <div class="mini-value" id="proposal-p50-mini">—</div>
+        <div class="mini-label">p50</div>
+      </div>
+
+      <div class="mini-stat">
+        <div class="mini-value" id="proposal-p95-mini">—</div>
+        <div class="mini-label">p95</div>
+      </div>
+    </div>
+
+    <div class="spark-wrap">
+      <svg
+        id="proposal-chart"
+        viewBox="0 0 700 160"
+        preserveAspectRatio="none"
+        aria-label="Recent proposal arrival observations"
+      ></svg>
+    </div>
+
+    <div class="notice">
+      Proposal arrival is measured from Natsai-operated infrastructure.
+      It is not a validator latency or performance score.
+    </div>
+  </div>
+
+</div>
+
+<div class="card section">
+  <div class="section-title">
+    <h2>Consensus Events</h2>
+    <span class="small" id="events-scope">Loading…</span>
+  </div>
+
+  <div id="events-feed">
+    <div class="small">Loading consensus event telemetry…</div>
+  </div>
+</div>
+
 <div class="card section">
   <h2>Latest finality certificate</h2>
 
@@ -310,9 +821,8 @@ footer {
   </table>
 
   <div class="notice">
-    Certificate inclusion reflects whether a validator signature appeared in
-    an observed finalized certificate. It is not a validator uptime or
-    performance score.
+    Certificate inclusion is calculated over the latest 10,000 observed
+    finalized certificates. It is not a validator uptime or performance score.
   </div>
 </div>
 
@@ -344,6 +854,347 @@ async function get(path) {
   const r = await fetch(path, {cache:"no-store"});
   if (!r.ok) throw new Error(path + " returned " + r.status);
   return r.json();
+}
+
+
+const esc = value =>
+  String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+
+function renderProposalChart(arrival) {
+  const svg = $("proposal-chart");
+  const points = arrival?.points || [];
+
+  if (!svg || points.length < 2) {
+    if (svg) svg.innerHTML = "";
+    return;
+  }
+
+  const width = 700;
+  const height = 160;
+  const padX = 8;
+  const padY = 10;
+
+  const values = points.map(p => Number(p.delay_ms) || 0);
+  const maxValue = Math.max(
+    ...values,
+    Number(arrival.p95_ms) || 0,
+    1
+  ) * 1.12;
+
+  const x = i =>
+    padX +
+    i * ((width - padX * 2) / (points.length - 1));
+
+  const y = value =>
+    height - padY -
+    (value / maxValue) * (height - padY * 2);
+
+  const coords = points
+    .map((p, i) => `${x(i).toFixed(1)},${y(p.delay_ms).toFixed(1)}`)
+    .join(" ");
+
+  const area =
+    `${padX},${height-padY} ` +
+    coords +
+    ` ${width-padX},${height-padY}`;
+
+  const p50Y = y(arrival.p50_ms ?? 0).toFixed(1);
+  const p95Y = y(arrival.p95_ms ?? 0).toFixed(1);
+
+  svg.innerHTML = `
+    <line
+      x1="0" y1="${p95Y}"
+      x2="${width}" y2="${p95Y}"
+      class="spark-p95"
+    />
+    <line
+      x1="0" y1="${p50Y}"
+      x2="${width}" y2="${p50Y}"
+      class="spark-p50"
+    />
+    <polygon points="${area}" class="spark-fill" />
+    <polyline points="${coords}" class="spark-line" />
+  `;
+}
+
+function renderQuorum(data) {
+  const cert = data?.certificate;
+  const validators = data?.validators || [];
+
+  if (!cert) return;
+
+  const signedPct = Number(cert.signed_voting_power_pct) || 0;
+  const thresholdPct =
+    Number(cert.total_voting_power)
+      ? Number(cert.quorum_required) /
+        Number(cert.total_voting_power) * 100
+      : 0;
+
+  $("quorum-height").textContent =
+    "Height " + fmt(cert.height);
+
+  $("quorum-percent").textContent =
+    pct(signedPct);
+
+  $("quorum-power").textContent =
+    fmt(cert.signed_voting_power) +
+    " / " +
+    fmt(cert.total_voting_power) +
+    " voting power";
+
+  $("quorum-margin-live").textContent =
+    "+" + fmt(cert.voting_power_above_quorum) + " VP";
+
+  $("quorum-fill").style.width =
+    Math.max(0, Math.min(100, signedPct)) + "%";
+
+  $("quorum-threshold").style.left =
+    Math.max(0, Math.min(100, thresholdPct)) + "%";
+
+  $("quorum-threshold-label").textContent =
+    "BFT threshold " + thresholdPct.toFixed(2) + "%";
+
+  const maxPower = Math.max(
+    ...validators.map(v => Number(v.voting_power) || 0),
+    1
+  );
+
+  $("quorum-validators").innerHTML =
+    validators.map(v => {
+      const signed = Number(v.signed) === 1;
+      const proposer =
+        String(v.address).toLowerCase() ===
+        String(cert.proposer || "").toLowerCase();
+
+      const powerPct =
+        (Number(v.voting_power) / maxPower * 100)
+          .toFixed(2);
+
+      return `
+        <div
+          class="validator-live ${signed ? "signed" : ""} ${proposer ? "proposer" : ""}"
+          title="${esc(v.address)}"
+        >
+          <div class="validator-address">
+            ${esc(short(v.address))}
+          </div>
+
+          <div class="validator-meta">
+            <span>${fmt(v.voting_power)} VP</span>
+            <span class="${signed ? "good" : ""}">
+              ${proposer ? '<span class="proposer-tag">P</span> · ' : ""}
+              ${signed ? "signed" : "not included"}
+            </span>
+          </div>
+
+          <div class="validator-vp-track">
+            <div
+              class="validator-vp-fill"
+              style="width:${powerPct}%"
+            ></div>
+          </div>
+        </div>
+      `;
+    }).join("");
+}
+
+function renderEvents(pulse) {
+  const events = pulse?.events || {};
+  const dbEvents = events.database_anomalies || [];
+  const misbehavior = events.misbehavior || [];
+  const invalidPayloads = events.invalid_payloads || [];
+
+  const rows = [];
+
+  dbEvents.forEach(e => {
+    if (Number(e.certificate_round) > 0) {
+      rows.push({
+        height: e.height,
+        text: "Round escalation · Round " + e.certificate_round
+      });
+    }
+
+    if (Number(e.cert_matches_execution) === 0) {
+      rows.push({
+        height: e.height,
+        text: "Certificate / local execution mismatch"
+      });
+    }
+
+    if (Number(e.rpc_hash_match) === 0) {
+      rows.push({
+        height: e.height,
+        text: "Natsai / official Arc RPC block mismatch"
+      });
+    }
+
+    if (Number(e.unknown_signer_count) > 0) {
+      rows.push({
+        height: e.height,
+        text:
+          "Unknown certificate signer(s) · " +
+          e.unknown_signer_count
+      });
+    }
+  });
+
+  misbehavior.forEach(e => {
+    rows.push({
+      height: e.height,
+      text:
+        "Misbehavior evidence observed · " +
+        e.validator_count +
+        " validator(s)"
+    });
+  });
+
+  invalidPayloads.forEach(e => {
+    rows.push({
+      height: e.height,
+      text:
+        "Invalid payload(s) observed · " +
+        e.payload_count
+    });
+  });
+
+  const forensicComplete =
+    events.misbehavior_available &&
+    events.invalid_payloads_available;
+
+  $("events-scope").textContent =
+    "10,000 certs · 100 forensic heights";
+
+  $("event-window-label").textContent =
+    forensicComplete
+      ? "10k certs + 100 forensic heights"
+      : "partial forensic telemetry";
+
+  if (!rows.length && forensicComplete) {
+    $("events-feed").innerHTML = `
+      <div class="event-clean">
+        <span class="event-clean-icon"></span>
+        <div>
+          <div class="good">
+            No consensus anomalies detected
+          </div>
+          <div class="small">
+            In the current Observatory detection windows
+          </div>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  if (!rows.length) {
+    $("events-feed").innerHTML = `
+      <div class="event-clean">
+        <span class="event-clean-icon" style="background:var(--warn)"></span>
+        <div>
+          <div class="warn">Partial forensic telemetry</div>
+          <div class="small">
+            No events detected in currently available sources
+          </div>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  $("events-feed").innerHTML =
+    rows.slice(0, 20).map(e => `
+      <div class="event-item">
+        <div class="event-title">${esc(e.text)}</div>
+        <div class="event-height">
+          #${fmt(e.height)}
+        </div>
+      </div>
+    `).join("");
+}
+
+function renderPulse(pulse) {
+  const arrival = pulse?.proposal_arrival || {};
+  const events = pulse?.events || {};
+
+  $("round-zero-streak").textContent =
+    fmt(pulse.round_zero_streak);
+
+  $("proposal-p50").textContent =
+    arrival.p50_ms == null
+      ? "—"
+      : fmt(arrival.p50_ms) + " ms";
+
+  $("proposal-p95").textContent =
+    arrival.p95_ms == null
+      ? "—"
+      : fmt(arrival.p95_ms) + " ms";
+
+  $("consensus-event-count").textContent =
+    fmt(events.count ?? 0);
+
+  $("proposal-latest").textContent =
+    arrival.latest_ms == null
+      ? "—"
+      : fmt(arrival.latest_ms) + " ms";
+
+  $("proposal-p50-mini").textContent =
+    arrival.p50_ms == null
+      ? "—"
+      : fmt(arrival.p50_ms) + " ms";
+
+  $("proposal-p95-mini").textContent =
+    arrival.p95_ms == null
+      ? "—"
+      : fmt(arrival.p95_ms) + " ms";
+
+  $("pulse-window").textContent =
+    fmt(arrival.samples || 0) +
+    " proposal observations · live";
+
+  renderProposalChart(arrival);
+  renderEvents(pulse);
+}
+
+
+function promoteQuorum() {
+  const slot = $("quorum-top-slot");
+  const grid = document.querySelector(".consensus-live-grid");
+
+  if (!slot || !grid) return;
+
+  const quorumCard = [...grid.children].find(card => {
+    const heading = card.querySelector("h2");
+    return heading &&
+      heading.textContent.trim() === "Live Quorum";
+  });
+
+  if (!quorumCard) return;
+
+  slot.appendChild(quorumCard);
+  grid.classList.add("quorum-promoted");
+}
+
+async function refreshQuorum() {
+  try {
+    const quorum = await get("/api/quorum");
+    renderQuorum(quorum);
+  } catch (err) {
+    console.error("Quorum refresh failed:", err);
+  }
+}
+
+async function refreshPulse() {
+  try {
+    const pulse = await get("/api/pulse");
+    renderPulse(pulse);
+  } catch (err) {
+    console.error("Consensus pulse refresh failed:", err);
+  }
 }
 
 async function refresh() {
@@ -479,6 +1330,15 @@ async function refreshValidators() {
 
 refreshValidators();
 setInterval(refreshValidators, 30000);
+
+promoteQuorum();
+
+refreshQuorum();
+setInterval(refreshQuorum, 5000);
+
+refreshPulse();
+setInterval(refreshPulse, 15000);
+
 </script>
 </body>
 </html>
