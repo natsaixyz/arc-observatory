@@ -59,6 +59,18 @@ The read-only API serves the stored telemetry to the public dashboard.
 - deploy/systemd — example production services
 - deploy/nginx — example reverse-proxy configuration
 
+## Live consensus telemetry
+
+The public dashboard includes several Arc consensus views built from Natsai-operated infrastructure:
+
+- **Live Quorum** — shows which validators signed the latest observed finality certificate, signed voting power, BFT quorum threshold and margin above quorum
+- **Consensus Pulse** — tracks the current observed Round-0 certificate streak and recent consensus activity
+- **Proposal Arrival** — displays proposal arrival observations from Natsai infrastructure, including p50 and p95 latency
+- **Consensus Events** — surfaces round escalation, certificate/execution mismatches, RPC inconsistencies, unknown signers, misbehavior evidence and invalid payloads
+- **Integrity checks** — compares Arc finality certificates with local execution and the official Arc public RPC
+
+Proposal arrival is an observation from Natsai infrastructure and should not be interpreted as validator latency or a validator performance score.
+
 ## API
 
 The live API is available under:
@@ -70,6 +82,8 @@ Current endpoints:
 - /api/health
 - /api/summary
 - /api/latest
+- /api/quorum
+- /api/pulse
 - /api/validators
 - /api/rounds
 
